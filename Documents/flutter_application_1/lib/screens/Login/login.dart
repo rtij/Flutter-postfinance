@@ -22,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   bool _isLoading = false;
+
   String formatPhoneNumber(String phoneNumber) {
     // Retirer tous les caractères non numériques
     final cleanedNumber = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
@@ -215,41 +216,58 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 36),
-                    NeumorphicContainer(
-                      padding: const EdgeInsets.all(0),
-                      child: SizedBox(
-                        width: double.infinity,
+                    SizedBox(
+                      width: double.infinity,
+                      child: NeumorphicContainer(
+                        padding: const EdgeInsets.all(0),
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _submitForm,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors
-                                .transparent, // Fond transparent pour voir l'effet neumorphique
-                            shadowColor: Colors
-                                .transparent, // Pas d'ombre supplémentaire
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        onPressed: _isLoading ? null : _submitForm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent, // Fond transparent pour voir l'effet neumorphique
+                          shadowColor:
+                              Colors.transparent, // Pas d'ombre supplémentaire
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Se connecter',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                      ),
+                      )
+                    ),
+                    Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Beamer.of(context).beamToNamed('/home');
+                            },
+                            child: Text(
+                              'Mot de passe oublié ?',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.7),
+                              ),
                             ),
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  'Se connecter',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                  ),
-                                ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),

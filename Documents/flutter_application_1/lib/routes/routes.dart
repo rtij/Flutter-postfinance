@@ -1,10 +1,12 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter_application_1/screens/Home/home.dart';
+import 'package:flutter_application_1/screens/Test/parent.dart';
 import 'package:localstorage/localstorage.dart';
 import '../screens/Login/login.dart';
 
 bool isLoggedIn() {
   final token = localStorage.getItem('token');
+  print('Token found: $token');
   return token != null && token.toString().isNotEmpty;
 }
 
@@ -28,6 +30,7 @@ final routerDelegate = BeamerDelegate(
     routes: {
       '/login': (context,data, state) => const LoginPage(),
       '/home': (context,data, state) => const Home(),
+      '/parent': (context,data, state) => const ParentWidget(),
     },
   ).call,
 );
