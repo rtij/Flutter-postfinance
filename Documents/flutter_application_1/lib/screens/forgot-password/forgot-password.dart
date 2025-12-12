@@ -7,14 +7,14 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:beamer/beamer.dart';
 import '../../services/login.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class ForgottenPassword extends StatefulWidget {
+  const ForgottenPassword({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<ForgottenPassword> createState() => _ForgottenPasswordState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _ForgottenPasswordState extends State<ForgottenPassword> {
   final LoginService _loginService = LoginService();
   PhoneNumber _phone = PhoneNumber(isoCode: 'SN');
   bool _obscurePassword = true;
@@ -27,195 +27,6 @@ class _LoginPageState extends State<LoginPage> {
       return '00$cleanedNumber';
     }
     return phoneNumber;
-  }
-
-  void _showAccountTypeDialog() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(isDark ? 0.1 : 0.95),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 40,
-                  offset: const Offset(0, 20),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Icon
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFf59e0b).withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.help_outline,
-                          size: 48,
-                          color: Color(0xFFf59e0b),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Title
-                      Text(
-                        'Confirmation',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF1f2937),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Message
-                      Text(
-                        'Avez vous déjà un compte ?',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isDark
-                              ? Colors.white.withOpacity(0.8)
-                              : const Color(0xFF6b7280),
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Beamer.of(
-                                  context,
-                                ).beamToNamed('/home/register');
-                              },
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                side: BorderSide(
-                                  color: isDark
-                                      ? Colors.white.withOpacity(0.3)
-                                      : const Color(0xFF6366f1),
-                                  width: 2,
-                                ),
-                                backgroundColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text(
-                                'Oui',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? Colors.white
-                                      : const Color(0xFF6366f1),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Beamer.of(context).beamToNamed(
-                                  '/home/inscription-banque-digitale',
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.all(0),
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Ink(
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF6366f1),
-                                      Color(0xFF8b5cf6),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  child: const Text(
-                                    'Non',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Close button
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          'Annuler',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDark
-                                ? Colors.white.withOpacity(0.6)
-                                : const Color(0xFF9ca3af),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _submitForm() async {
@@ -275,18 +86,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 24),
 
-            // Title
-            Text(
-              'Bienvenue',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF1f2937),
-              ),
-            ),
             const SizedBox(height: 8),
             Text(
-              'Connectez-vous pour continuer',
+              'Mot de passe oublié',
               style: TextStyle(
                 fontSize: 16,
                 color: isDark
@@ -401,14 +203,14 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               child: FormBuilderTextField(
-                name: 'password',
+                name: 'email',
                 obscureText: _obscurePassword,
                 style: TextStyle(
                   color: isDark ? Colors.white : const Color(0xFF1f2937),
                 ),
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  labelText: 'Mot de passe',
+                  labelText: 'Adresse e-mail',
                   labelStyle: TextStyle(
                     color: isDark
                         ? Colors.white.withOpacity(0.7)
@@ -452,31 +254,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Remember Me & Forgot Password
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    //navigate to forgot password page
-                    Beamer.of(context).beamToNamed('/forgotten-password');
-                  },
-                  child: Text(
-                    'Mot de passe oublié?',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDark
-                          ? const Color(0xFF818cf8)
-                          : const Color(0xFF6366f1),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
             // Sign In Button
             SizedBox(
               width: double.infinity,
@@ -524,7 +301,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           )
                         : const Text(
-                            'Se connecter',
+                            'Envoyer',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -535,39 +312,25 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Sign Up Link
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Pas de compte? ",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isDark
-                        ? Colors.white.withOpacity(0.7)
-                        : const Color(0xFF6b7280),
-                  ),
+            SizedBox(height: 16),
+            // back to login button
+            TextButton(
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.amber  
+              ),
+              onPressed: () {
+                Beamer.of(context).beamToNamed('/login');
+              },
+              child: Text(
+                
+                'Retour',
+                style: TextStyle(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.7)
+                      : const Color(0xFF6b7280),
                 ),
-                TextButton(
-                  onPressed: () {
-                    _showAccountTypeDialog();
-                    print("Navigating to Sign Up");
-                    // Handle sign up
-                  },
-                  child: Text(
-                    'Ouverture de compte',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDark
-                          ? const Color(0xFF818cf8)
-                          : const Color(0xFF6366f1),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),

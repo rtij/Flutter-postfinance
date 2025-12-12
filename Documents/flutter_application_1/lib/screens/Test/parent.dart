@@ -200,6 +200,7 @@ class ShapesPainter extends CustomPainter {
   ShapesPainter({required this.isDark});
 
   @override
+
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.fill

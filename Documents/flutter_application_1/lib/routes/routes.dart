@@ -1,8 +1,9 @@
 import 'package:beamer/beamer.dart';
-import 'package:flutter_application_1/screens/Home/home.dart';
+import 'package:flutter_application_1/screens/Client-space/Home/home.dart';
 import 'package:flutter_application_1/screens/Test/parent.dart';
 import 'package:localstorage/localstorage.dart';
 import '../screens/Login/login.dart';
+import '../screens/forgot-password/forgot-password.dart';
 
 bool isLoggedIn() {
   final token = localStorage.getItem('token');
@@ -13,7 +14,7 @@ bool isLoggedIn() {
 class AuthGuard extends BeamGuard {
   AuthGuard()
     : super(
-        pathPatterns: ['/login'],
+        pathPatterns: ['/login', '/forgotten-password'],
         // perform the check on all patterns that **don't** have a match in pathPatterns
         guardNonMatching: true,
         // return false to redirect
@@ -31,6 +32,7 @@ final routerDelegate = BeamerDelegate(
       '/login': (context,data, state) => const LoginPage(),
       '/home': (context,data, state) => const Home(),
       '/parent': (context,data, state) => const ParentWidget(),
+      '/forgotten-password': (context,data, state) => const ForgottenPassword(),
     },
   ).call,
 );

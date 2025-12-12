@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           title: 'Neumorphic Login',
           debugShowCheckedModeBanner: false,
-          theme: themeProvider.isDarkMode ? _darkTheme : _lightTheme,
+          theme: themeProvider.isDarkMode ? darkTheme : lightTheme,
 
           // Beamer integration
           routerDelegate: routerDelegate,
@@ -36,23 +36,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// Thème clair (neumorphisme)
-final ThemeData _lightTheme = ThemeData(
-  brightness: Brightness.light,
-  scaffoldBackgroundColor: const Color(0xFFE0E5EC),
-  colorScheme: const ColorScheme.light(
-    primary: Colors.blueGrey,
-    secondary: Colors.white,
-  ),
-);
-
-// Thème sombre (neumorphisme)
-final ThemeData _darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  scaffoldBackgroundColor: const Color(0xFF232528),
-  colorScheme: const ColorScheme.dark(
-    primary: Colors.white,
-    secondary: Color(0xFF3A3D40),
-  ),
-);
