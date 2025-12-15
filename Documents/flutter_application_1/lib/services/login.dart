@@ -1,33 +1,32 @@
-import 'package:localstorage/localstorage.dart';
 import 'dio.dart';
+import 'connectivity.dart';
 
 class LoginService {
   final dio = DioClient().dio;
 
-  Future<bool> login(String identifiant, String mot_de_passe) async {
-    print(identifiant);
-    print(mot_de_passe);
+  Future<ApiResponse<dynamic>> login(String identifiant, String motDePasse) async {
     try {
       final response = await dio.post(
         '/auth/login',
-        data: {
-          'identifiant': identifiant,
-          'mot_de_passe': mot_de_passe,
-        },
+        data: {'identifiant': identifiant, 'mot_de_passe': motDePasse},
       );
-      print('✅ Login successful: ${response.data}');
-      final token = response.data['data']['access_token'];
 
-      if (token != null) {
-        localStorage.setItem('token', token);
-        print("🔑 Token saved: $token");
-        return true;
-      }
-
-      return false;
+      return ApiResponse<dynamic>.fromJson(response.data, (_) => null);
     } catch (e) {
-      print('❌ Login failed: $e');
-      return false;
+      throw e;
+    }
+  }
+
+  Future<ApiResponse<void>> forgotPassword(String email, String phone) async {
+    try {
+      final response = await dio.post(
+        '/auth/forget_password',
+        data: {'email': email, 'identifiant': phone},
+      );
+
+      return ApiResponse<dynamic>.fromJson(response.data, (_) => null);
+    } catch (e) {
+      throw e;
     }
   }
 }

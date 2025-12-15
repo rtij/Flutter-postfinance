@@ -6,6 +6,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:beamer/beamer.dart';
 import '../../services/login.dart';
+import '../../utils/phone_formatter.dart';
 
 class ForgottenPassword extends StatefulWidget {
   const ForgottenPassword({super.key});
@@ -17,34 +18,35 @@ class ForgottenPassword extends StatefulWidget {
 class _ForgottenPasswordState extends State<ForgottenPassword> {
   final LoginService _loginService = LoginService();
   PhoneNumber _phone = PhoneNumber(isoCode: 'SN');
-  bool _obscurePassword = true;
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
 
-  String formatPhoneNumber(String phoneNumber) {
-    final cleanedNumber = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    if (cleanedNumber.length >= 3 && !cleanedNumber.startsWith('00')) {
-      return '00$cleanedNumber';
-    }
-    return phoneNumber;
-  }
+  
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.saveAndValidate()) {
       setState(() => _isLoading = true);
       try {
         final formattedPhone = formatPhoneNumber(_phone.phoneNumber!);
-        final success = await _loginService.login(
-          formattedPhone,
-          _formKey.currentState!.value['password'],
-        );
-        if (success) {
-          Beamer.of(context).beamToNamed('/home');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Numéro ou mot de passe incorrect')),
-          );
-        }
+        final email = _formKey.currentState!.value['email'];
+        await _loginService
+            .forgotPassword(email, formattedPhone)
+            .then((res) {
+              if (res.code == 200) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('${res.msg}')));
+              } else {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Erreur: ${res.msg}')));
+              }
+            })
+            .catchError((err) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erreur: ${err.toString()}')),
+              );
+            });
       } catch (e) {
         ScaffoldMessenger.of(
           context,
@@ -82,15 +84,29 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.person, size: 40, color: Colors.white),
+              child: const Icon(
+                Icons.lock_reset,
+                size: 40,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 24),
 
-            const SizedBox(height: 8),
+            // Title
             Text(
               'Mot de passe oublié',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF1f2937),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Entrez vos informations pour réinitialiser',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
                 color: isDark
                     ? Colors.white.withOpacity(0.7)
                     : const Color(0xFF6b7280),
@@ -128,10 +144,8 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Utilisez un Container avec une largeur maximale
                       Container(
-                        width: double
-                            .infinity, // Prend toute la largeur disponible
+                        width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(isDark ? 0.05 : 0.5),
                           borderRadius: BorderRadius.circular(16),
@@ -151,7 +165,6 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                           ignoreBlank: false,
                           errorMessage: null,
                           spaceBetweenSelectorAndTextField: 0,
-                          // Ajustez le padding interne pour que le texte prenne toute la largeur
                           textFieldController: TextEditingController(),
                           inputDecoration: InputDecoration(
                             border: InputBorder.none,
@@ -162,13 +175,11 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                                   : const Color(0xFF6b7280),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal:
-                                  16, // Ajustez ce padding selon vos besoins
+                              horizontal: 16,
                               vertical: 16,
                             ),
                           ),
-                          // Assurez-vous que le champ de texte prend toute la largeur disponible
-                          formatInput: false,
+                          formatInput: true,
                         ),
                       ),
                       if (field.errorText != null)
@@ -193,7 +204,7 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
             ),
             const SizedBox(height: 20),
 
-            // Password Field
+            // Email Field
             Container(
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(isDark ? 0.05 : 0.5),
@@ -204,7 +215,7 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
               ),
               child: FormBuilderTextField(
                 name: 'email',
-                obscureText: _obscurePassword,
+                keyboardType: TextInputType.emailAddress,
                 style: TextStyle(
                   color: isDark ? Colors.white : const Color(0xFF1f2937),
                 ),
@@ -217,25 +228,10 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                         : const Color(0xFF6b7280),
                   ),
                   prefixIcon: Icon(
-                    Icons.lock,
+                    Icons.email_outlined,
                     color: isDark
                         ? Colors.white.withOpacity(0.5)
                         : const Color(0xFF9ca3af),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: isDark
-                          ? Colors.white.withOpacity(0.5)
-                          : const Color(0xFF9ca3af),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -244,17 +240,17 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                 ),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                    errorText: "Veuillez entrer votre mot de passe",
+                    errorText: "Veuillez entrer votre adresse e-mail",
                   ),
-                  FormBuilderValidators.minLength(
-                    6,
-                    errorText: 'Minimum 6 caractères',
+                  FormBuilderValidators.email(
+                    errorText: 'Adresse e-mail invalide',
                   ),
                 ]),
               ),
             ),
-            const SizedBox(height: 20),
-            // Sign In Button
+            const SizedBox(height: 32),
+
+            // Submit Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -301,7 +297,7 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                             ),
                           )
                         : const Text(
-                            'Envoyer',
+                            'Réinitialiser le mot de passe',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -312,23 +308,34 @@ class _ForgottenPasswordState extends State<ForgottenPassword> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
-            // back to login button
-            TextButton(
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                backgroundColor: Colors.amber  
-              ),
-              onPressed: () {
-                Beamer.of(context).beamToNamed('/login');
-              },
-              child: Text(
-                
-                'Retour',
-                style: TextStyle(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.7)
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Beamer.of(context).beamToNamed('/login');
+                },
+                icon: const Icon(Icons.chevron_left, size: 20),
+                label: const Text(
+                  'Retour',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: isDark
+                      ? Colors.white.withOpacity(0.8)
                       : const Color(0xFF6b7280),
+                  side: BorderSide(
+                    color: Colors.white.withOpacity(isDark ? 0.2 : 0.3),
+                  ),
+                  backgroundColor: Colors.white.withOpacity(
+                    isDark ? 0.05 : 0.5,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
             ),

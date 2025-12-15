@@ -5,14 +5,23 @@ import '../providers/themeProvider.dart';
 
 class AnimatedBackground extends StatefulWidget {
   final Widget content;
-  const AnimatedBackground({super.key, required this.content});
+  final bool showThemeSwitcher;
+  final bool showPageIndicators;
+  final EdgeInsets contentPadding;
+  const AnimatedBackground({
+    super.key,
+    required this.content,
+    this.showThemeSwitcher = true,
+    this.showPageIndicators = true,
+    this.contentPadding = const EdgeInsets.all(32),
+  });
 
   @override
   State<AnimatedBackground> createState() => _AnimatedBackgroundState();
 }
 
-class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProviderStateMixin {
-
+class _AnimatedBackgroundState extends State<AnimatedBackground>
+    with TickerProviderStateMixin {
   late AnimationController _controller1;
   late AnimationController _controller2;
   late AnimationController _controller3;
@@ -42,17 +51,20 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       body: Stack(
         children: [
           // Animated Gradient Background
           AnimatedBuilder(
-            animation: Listenable.merge([_controller1, _controller2, _controller3]),
+            animation: Listenable.merge([
+              _controller1,
+              _controller2,
+              _controller3,
+            ]),
             builder: (context, child) {
               return Container(
                 decoration: BoxDecoration(
@@ -86,12 +98,16 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
                           gradient: RadialGradient(
                             colors: isDark
                                 ? [
-                                    Theme.of(context).primaryColor.withOpacity(0.3),
+                                    Theme.of(
+                                      context,
+                                    ).primaryColor.withOpacity(0.3),
                                     const Color(0xFF8b5cf6).withOpacity(0.1),
                                   ]
                                 : [
                                     const Color(0xFFa855f7).withOpacity(0.3),
-                                    Theme.of(context).primaryColor.withOpacity(0.3).withOpacity(0.1),
+                                    Theme.of(context).primaryColor
+                                        .withOpacity(0.3)
+                                        .withOpacity(0.1),
                                   ],
                           ),
                         ),
@@ -123,7 +139,9 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
                     // Gradient Orb 3
                     Positioned(
                       bottom: 100 + (_controller3.value * 60),
-                      left: MediaQuery.of(context).size.width * 0.3 + (_controller3.value * 20),
+                      left:
+                          MediaQuery.of(context).size.width * 0.3 +
+                          (_controller3.value * 20),
                       child: Container(
                         width: 280,
                         height: 280,
@@ -133,10 +151,14 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
                             colors: isDark
                                 ? [
                                     const Color(0xFF3b82f6).withOpacity(0.3),
-                                    Theme.of(context).primaryColor.withOpacity(0.3).withOpacity(0.1),
+                                    Theme.of(context).primaryColor
+                                        .withOpacity(0.3)
+                                        .withOpacity(0.1),
                                   ]
                                 : [
-                                    Theme.of(context).primaryColor.withOpacity(0.3).withOpacity(0.3),
+                                    Theme.of(context).primaryColor
+                                        .withOpacity(0.3)
+                                        .withOpacity(0.3),
                                     const Color(0xFF3b82f6).withOpacity(0.1),
                                   ],
                           ),
@@ -169,7 +191,6 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
                     ],
                   ),
                   child: ClipRRect(
-                    
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Padding(
@@ -179,81 +200,87 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
                     ),
                   ),
                 ),
-                
+
                 // Theme Switcher positioned on top of the card
-                Positioned(
-                  top: 20,
-                  right: 20,
-                  child: GestureDetector(
-                    onTap: () {
-                      Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(isDark ? 0.1 : 0.7),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+                if (widget.showThemeSwitcher)
+                  Positioned(
+                    top: 20,
+                    right: 20,
+                    child: GestureDetector(
+                      onTap: () {
+                        Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        ).toggleTheme();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(isDark ? 0.1 : 0.7),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.2),
+                            width: 1,
                           ),
-                        ],
-                      ),
-                      child: Consumer<ThemeProvider>(
-                        builder: (context, themeProvider, child) {
-                          return Icon(
-                            themeProvider.isDarkMode
-                                ? Icons.wb_sunny
-                                : Icons.nightlight_round,
-                            color: isDark ? Colors.white : Theme.of(context).primaryColor,
-                            size: 24,
-                          );
-                        },
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Consumer<ThemeProvider>(
+                          builder: (context, themeProvider, child) {
+                            return Icon(
+                              themeProvider.isDarkMode
+                                  ? Icons.wb_sunny
+                                  : Icons.nightlight_round,
+                              color: isDark
+                                  ? Colors.white
+                                  : Theme.of(context).primaryColor,
+                              size: 24,
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
 
-          // Page Indicators
-          Positioned(
-            bottom: 40,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF6366f1),
-                    shape: BoxShape.circle,
+          if (widget.showPageIndicators)
+            // Page Indicators
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF6366f1),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
-                    shape: BoxShape.circle,
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 }
-

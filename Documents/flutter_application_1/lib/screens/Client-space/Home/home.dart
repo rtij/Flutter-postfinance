@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:beamer/beamer.dart';
+import 'package:flutter_application_1/shared/animatedBackground.dart';
+import 'package:flutter_application_1/routes/routes.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -9,28 +11,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
-
-  
-
-
-  testClick() {
-    print("Test click");
-    context.beamToNamed('/parent');
-  }
-
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: testClick,
-          child: const Text('Test Click'),
-        ),
-      ),
+    return AnimatedBackground(
+      showThemeSwitcher: false,
+      showPageIndicators: false,
+      contentPadding: EdgeInsets.zero,
+      content: Beamer(routerDelegate: homeRouterDelegate),
     );
   }
 }

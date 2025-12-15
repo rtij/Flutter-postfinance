@@ -6,6 +6,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:beamer/beamer.dart';
 import '../../services/login.dart';
+import 'package:localstorage/localstorage.dart';
+import '../../utils/phone_formatter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,14 +22,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
-
-  String formatPhoneNumber(String phoneNumber) {
-    final cleanedNumber = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    if (cleanedNumber.length >= 3 && !cleanedNumber.startsWith('00')) {
-      return '00$cleanedNumber';
-    }
-    return phoneNumber;
-  }
 
   void _showAccountTypeDialog() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -218,22 +212,41 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _submitForm() async {
+  Future<dynamic> _submitForm() async {
     if (_formKey.currentState!.saveAndValidate()) {
       setState(() => _isLoading = true);
+
       try {
         final formattedPhone = formatPhoneNumber(_phone.phoneNumber!);
-        final success = await _loginService.login(
-          formattedPhone,
-          _formKey.currentState!.value['password'],
-        );
-        if (success) {
-          Beamer.of(context).beamToNamed('/home');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Numéro ou mot de passe incorrect')),
-          );
-        }
+        final password = _formKey.currentState!.value['password'];
+
+        await _loginService
+            .login(formattedPhone, password)
+            .then((res) {
+              print(res);
+              print(res.code);
+              print(res.msg);
+              print(res.data);
+              if (res.code == 200) {
+                final token = res.data['data']?['access_token'];
+                if (token is String && token.isNotEmpty) {
+                  localStorage.setItem('token', token);
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Connexion réussie')),
+                );
+                Beamer.of(context).beamToNamed('/home');
+              }else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erreur: ${res.msg}')),
+                );
+              }
+            })
+            .catchError((err) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erreur: ${err.toString()}')),
+              );
+            });
       } catch (e) {
         ScaffoldMessenger.of(
           context,
@@ -366,7 +379,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           // Assurez-vous que le champ de texte prend toute la largeur disponible
-                          formatInput: false,
+                          formatInput: true,
                         ),
                       ),
                       if (field.errorText != null)

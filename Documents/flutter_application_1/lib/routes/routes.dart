@@ -1,4 +1,5 @@
 import 'package:beamer/beamer.dart';
+import 'package:flutter_application_1/screens/Client-space/Dashboard/dashboard.dart';
 import 'package:flutter_application_1/screens/Client-space/Home/home.dart';
 import 'package:flutter_application_1/screens/Test/parent.dart';
 import 'package:localstorage/localstorage.dart';
@@ -33,6 +34,18 @@ final routerDelegate = BeamerDelegate(
       '/home': (context,data, state) => const Home(),
       '/parent': (context,data, state) => const ParentWidget(),
       '/forgotten-password': (context,data, state) => const ForgottenPassword(),
+    },
+  ).call,
+);
+
+
+
+// Client space routes
+final homeRouterDelegate = BeamerDelegate(
+  initialPath: '/home/dashboard',
+  locationBuilder: RoutesLocationBuilder(
+    routes: {
+      '/home/dashboard': (context,data, state) => const Dashboard(),
     },
   ).call,
 );
