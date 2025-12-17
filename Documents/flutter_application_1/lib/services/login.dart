@@ -1,3 +1,4 @@
+
 import 'dio.dart';
 import 'connectivity.dart';
 
@@ -29,4 +30,21 @@ class LoginService {
       throw e;
     }
   }
+
+  //get current user
+  Future<ApiResponse<Map<String, dynamic>>> getCurrentUser() async {
+    try {
+      final response = await dio.get('/auth/me');
+
+      return ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  //logout clear token
+  
 }

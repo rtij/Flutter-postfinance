@@ -7,6 +7,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:beamer/beamer.dart';
 import '../../services/login.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:flutter_application_1/routes/routes.dart';
 import '../../utils/phone_formatter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -22,6 +23,17 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isLoggedIn()) {
+      print('User is already logged in, redirecting to home.');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Beamer.of(context).beamToNamed('/home');
+      });
+    }
+  }
 
   void _showAccountTypeDialog() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -223,23 +235,17 @@ class _LoginPageState extends State<LoginPage> {
         await _loginService
             .login(formattedPhone, password)
             .then((res) {
-              print(res);
-              print(res.code);
-              print(res.msg);
-              print(res.data);
               if (res.code == 200) {
-                final token = res.data['data']?['access_token'];
+                final token = res.data['access_token'];
                 if (token is String && token.isNotEmpty) {
-                  localStorage.setItem('token', token);
+                  localStorage.setItem('token', token.toString());
                 }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Connexion réussie')),
-                );
                 Beamer.of(context).beamToNamed('/home');
-              }else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur: ${res.msg}')),
-                );
+                
+              } else {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Erreur: ${res.msg}')));
               }
             })
             .catchError((err) {

@@ -194,7 +194,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Padding(
-                        padding: const EdgeInsets.all(32.0),
+                        padding: widget.contentPadding,
                         child: widget.content,
                       ),
                     ),

@@ -1,5 +1,7 @@
 // lib/services/dio_client.dart
+import 'package:beamer/beamer.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import '../models/apiResponse.dart';
 
@@ -7,6 +9,9 @@ class DioClient {
   static final DioClient _instance = DioClient._internal();
   factory DioClient() => _instance;
   late Dio dio;
+  
+  // Stocker le BuildContext global
+  static BuildContext? _globalContext;
   
   DioClient._internal() {
     dio = Dio(
@@ -17,6 +22,11 @@ class DioClient {
       ),
     );
     _addInterceptor();
+  }
+
+  // Méthode pour initialiser le context
+  static void setContext(BuildContext context) {
+    _globalContext = context;
   }
 
   void _addInterceptor() {
@@ -34,7 +44,13 @@ class DioClient {
         },
         onError: (DioException e, handler) {
           if (e.response?.statusCode == 401) {
+            // Nettoyer le token
             localStorage.removeItem('token');
+            
+            // Rediriger vers la page de connexion
+            _redirectToLogin();
+            
+            print("🔒 Session expirée, redirection vers login");
           }
           return handler.next(e);
         },
@@ -42,7 +58,16 @@ class DioClient {
     );
   }
 
-  // Méthode générique pour les requêtes avec gestion de ApiResponse
+  void _redirectToLogin() {
+    if (_globalContext != null) {
+      // Utiliser Beamer avec le context global
+      Beamer.of(_globalContext!, root: true).beamToNamed('/login');
+    } else {
+      print("⚠️ Context non initialisé, impossible de rediriger");
+    }
+  }
+
+  // Reste du code inchangé...
   Future<ApiResponse<T>> request<T>(
     String path, {
     dynamic data,
@@ -58,22 +83,18 @@ class DioClient {
         options: options,
       );
 
-      // Parse la réponse en ApiResponse<T>
       return ApiResponse.fromJson(response.data, fromJsonT);
     } on DioException catch (e) {
-      // Gestion des erreurs Dio
       if (e.response != null) {
-        // Si le serveur retourne une erreur structurée (ex: 400, 500)
         try {
           return ApiResponse.fromJson(
             e.response!.data,
-            (json) => json as T, // Gestion basique, à adapter selon tes besoins
+            (json) => json as T,
           );
         } catch (_) {
           throw Exception('Erreur lors du parsing de la réponse: ${e.message}');
         }
       } else {
-        // Erreurs réseau (timeout, pas de connexion)
         throw Exception(_getDioErrorMessage(e));
       }
     } catch (e) {
@@ -81,20 +102,18 @@ class DioClient {
     }
   }
 
-  // Méthode pour obtenir un message d'erreur clair
   String _getDioErrorMessage(DioException e) {
-    if (e.type == DioErrorType.connectionTimeout ||
-        e.type == DioErrorType.receiveTimeout ||
-        e.type == DioErrorType.sendTimeout) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
       return 'Timeout : Impossible de se connecter au serveur.';
-    } else if (e.type == DioErrorType.unknown) {
+    } else if (e.type == DioExceptionType.connectionError) {
       return 'Pas de connexion Internet ou erreur réseau.';
     } else {
       return 'Erreur : ${e.message}';
     }
   }
 
-  // Méthodes spécifiques pour GET, POST, etc.
   Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
