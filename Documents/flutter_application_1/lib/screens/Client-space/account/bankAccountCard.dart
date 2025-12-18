@@ -291,10 +291,6 @@ class _BankAccountCardState extends State<BankAccountCard>
                       ),
                     ),
 
-                    const SizedBox(height: 16),
-
-                    // Actions rapides
-                    
                   ],
                 ),
               ),

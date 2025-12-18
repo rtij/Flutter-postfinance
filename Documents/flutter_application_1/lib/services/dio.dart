@@ -9,10 +9,10 @@ class DioClient {
   static final DioClient _instance = DioClient._internal();
   factory DioClient() => _instance;
   late Dio dio;
-  
+
   // Stocker le BuildContext global
   static BuildContext? _globalContext;
-  
+
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
@@ -40,16 +40,27 @@ class DioClient {
           return handler.next(options);
         },
         onResponse: (response, handler) {
+          if (response.data is Map<String, dynamic>) {
+            final apiResponse = ApiResponse.fromJson(
+              response.data,
+              (json) => json,
+            );
+            if (apiResponse.code == 401) {
+              localStorage.removeItem('token');
+              _redirectToLogin();
+            }
+          }
+
           return handler.next(response);
         },
         onError: (DioException e, handler) {
           if (e.response?.statusCode == 401) {
             // Nettoyer le token
             localStorage.removeItem('token');
-            
+
             // Rediriger vers la page de connexion
             _redirectToLogin();
-            
+
             print("🔒 Session expirée, redirection vers login");
           }
           return handler.next(e);
@@ -87,10 +98,7 @@ class DioClient {
     } on DioException catch (e) {
       if (e.response != null) {
         try {
-          return ApiResponse.fromJson(
-            e.response!.data,
-            (json) => json as T,
-          );
+          return ApiResponse.fromJson(e.response!.data, (json) => json as T);
         } catch (_) {
           throw Exception('Erreur lors du parsing de la réponse: ${e.message}');
         }

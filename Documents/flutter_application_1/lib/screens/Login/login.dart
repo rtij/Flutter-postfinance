@@ -32,6 +32,8 @@ class _LoginPageState extends State<LoginPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Beamer.of(context).beamToNamed('/home');
       });
+    }else{
+      print('User is not logged in, staying on login page.');
     }
   }
 
