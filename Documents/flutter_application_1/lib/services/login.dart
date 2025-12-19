@@ -45,6 +45,4 @@ class LoginService {
     }
   }
 
-  //logout clear token
-  
 }

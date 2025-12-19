@@ -10,8 +10,7 @@ class EnfantWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        Beamer.of(context, root: true).beamToNamed('/login');
-        onMessageSent("Message depuis l'enfant !");
+        Beamer.of(context).beamToNamed('/home/dashboard');
       },
       child: const Text("Envoyer"),
     );

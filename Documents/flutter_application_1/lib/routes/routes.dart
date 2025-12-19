@@ -5,6 +5,8 @@ import 'package:flutter_application_1/screens/Test/parent.dart';
 import 'package:localstorage/localstorage.dart';
 import '../screens/Login/login.dart';
 import '../screens/forgot-password/forgot-password.dart';
+import '../screens/Client-space/profile/profile.dart';
+import '../screens/notFound.dart';
 
 bool isLoggedIn() {
   final token = localStorage.getItem('token');
@@ -36,6 +38,10 @@ final routerDelegate = BeamerDelegate(
       '/forgotten-password': (context,data, state) => const ForgottenPassword(),
     },
   ).call,
+  notFoundPage: const BeamPage(
+    title: 'Page introuvable',
+    child: NotFoundPage(),
+  ),
 );
 
 
@@ -46,6 +52,7 @@ final homeRouterDelegate = BeamerDelegate(
   locationBuilder: RoutesLocationBuilder(
     routes: {
       '/home/dashboard': (context,data, state) => const Dashboard(),
+      '/home/profile': (context,data, state) => const ProfileScreen(),
     },
   ).call,
 );

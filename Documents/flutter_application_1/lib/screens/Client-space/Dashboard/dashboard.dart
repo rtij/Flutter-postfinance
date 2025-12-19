@@ -23,7 +23,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    _getComptes();
+    // _getComptes();
   }
 
   Future<void> _getComptes() async {
@@ -545,5 +545,11 @@ class _DashboardState extends State<Dashboard> {
         ],
       ),
     );
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

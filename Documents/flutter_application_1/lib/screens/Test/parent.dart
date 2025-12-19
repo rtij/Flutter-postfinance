@@ -1,3 +1,4 @@
+import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ class _ParentWidgetState extends State<ParentWidget> {
   String messageFromChild = "Nothing";
 
   void handleMessage(String message) {
+    print("Message from child: $message");
     setState(() {
       messageFromChild = message;
     });
@@ -52,17 +54,13 @@ class _ParentWidgetState extends State<ParentWidget> {
 
           // Decorative Shapes
           Positioned.fill(
-            child: CustomPaint(
-              painter: ShapesPainter(isDark: isDark),
-            ),
+            child: CustomPaint(painter: ShapesPainter(isDark: isDark)),
           ),
 
           // Blur Overlay
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              color: Colors.black.withOpacity(0.1),
-            ),
+            child: Container(color: Colors.black.withOpacity(0.1)),
           ),
 
           // Main Content
@@ -200,7 +198,6 @@ class ShapesPainter extends CustomPainter {
   ShapesPainter({required this.isDark});
 
   @override
-
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.fill
@@ -246,10 +243,26 @@ class ShapesPainter extends CustomPainter {
           ? Colors.white.withOpacity(0.04)
           : Colors.white.withOpacity(0.12);
 
-    canvas.drawCircle(Offset(size.width * 0.3, size.height * 0.2), 15, smallCirclePaint);
-    canvas.drawCircle(Offset(size.width * 0.6, size.height * 0.4), 20, smallCirclePaint);
-    canvas.drawCircle(Offset(size.width * 0.4, size.height * 0.85), 18, smallCirclePaint);
-    canvas.drawCircle(Offset(size.width * 0.95, size.height * 0.5), 12, smallCirclePaint);
+    canvas.drawCircle(
+      Offset(size.width * 0.3, size.height * 0.2),
+      15,
+      smallCirclePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.6, size.height * 0.4),
+      20,
+      smallCirclePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.4, size.height * 0.85),
+      18,
+      smallCirclePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.95, size.height * 0.5),
+      12,
+      smallCirclePaint,
+    );
   }
 
   @override
