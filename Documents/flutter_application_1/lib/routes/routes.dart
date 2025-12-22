@@ -48,7 +48,7 @@ final routerDelegate = BeamerDelegate(
 
 // Client space routes
 final homeRouterDelegate = BeamerDelegate(
-  initialPath: '/home/dashboard',
+  initialPath: '/home/profile',
   locationBuilder: RoutesLocationBuilder(
     routes: {
       '/home/dashboard': (context,data, state) => const Dashboard(),

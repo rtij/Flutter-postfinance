@@ -44,29 +44,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   Map<String, dynamic>? currentUser;
   bool isLoadingUser = true;
   late List<MenuSection> menuSections;
-  bool isDarkMode = false;
 
   @override
   void initState() {
-    isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkMode;
     super.initState();
     _initializeMenuSections();
     loadCurrentUser();
-    _loadThemePreference();
-  }
-
-  void _loadThemePreference() {
-    final theme = localStorage.getItem('theme');
-    setState(() {
-      isDarkMode = theme == 'dark';
-    });
-  }
-
-  void _toggleTheme(bool value) {
-    Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-    setState(() {
-      isDarkMode = !isDarkMode;
-    });
   }
 
   void loadCurrentUser() async {
@@ -75,25 +58,33 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           .getCurrentUser()
           .then((res) {
             if (res.code == 200) {
-              setState(() {
-                currentUser = res.data['info_user'];
-                isLoadingUser = false;
-              });
+              if (mounted) {
+                setState(() {
+                  currentUser = res.data['info_user'];
+                  isLoadingUser = false;
+                });
+              }
             } else {
+              if (mounted) {
+                setState(() {
+                  isLoadingUser = false;
+                });
+              }
+            }
+          })
+          .catchError((err) {
+            if (mounted) {
               setState(() {
                 isLoadingUser = false;
               });
             }
-          })
-          .catchError((err) {
-            setState(() {
-              isLoadingUser = false;
-            });
           });
     } catch (e) {
-      setState(() {
-        isLoadingUser = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoadingUser = false;
+        });
+      }
     }
   }
 
@@ -195,45 +186,58 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           ),
         ],
       ),
+      MenuSection(
+        title: 'Mon Profil',
+        icon: Icons.person_rounded,
+        link: '/home/profile',
+        collapsed: true,
+      ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBackground(
-      showThemeSwitcher: false,
-      showPageIndicators: false,
-      contentPadding: EdgeInsets.zero,
-      content: Scaffold(
-        backgroundColor: Colors.transparent,
-        drawer: _buildModernDrawer(),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: const Text(
-            'POSTE FINANCE',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-          ),
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.menu_rounded),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final isDark = themeProvider.isDarkMode;
+
+        return AnimatedBackground(
+          showThemeSwitcher: false,
+          showPageIndicators: false,
+          contentPadding: EdgeInsets.zero,
+          content: Scaffold(
+            backgroundColor: Colors.transparent,
+            drawer: _buildModernDrawer(isDark),
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: const Text(
+                'POSTE FINANCE',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
               ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              leading: Builder(
+                builder: (context) => IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.menu_rounded),
+                  ),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
             ),
+            body: child!,
           ),
-        ),
-        body: Beamer(routerDelegate: homeRouterDelegate),
-      ),
+        );
+      },
+      child: Beamer(routerDelegate: homeRouterDelegate),
     );
   }
 
-  Widget _buildModernDrawer() {
+  Widget _buildModernDrawer(bool isDark) {
     return Drawer(
       elevation: 0,
       shape: const RoundedRectangleBorder(
@@ -247,7 +251,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [const Color(0xFFF5F7FA), Colors.white],
+            colors: isDark
+                ? [const Color(0xFF1f2937), const Color(0xFF111827)]
+                : [const Color(0xFFF5F7FA), Colors.white],
           ),
         ),
         child: SafeArea(
@@ -259,25 +265,29 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Menu',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D3748),
+                        color: isDark ? Colors.white : const Color(0xFF2D3748),
                       ),
                     ),
                     IconButton(
                       icon: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: isDark
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey[200],
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close,
                           size: 20,
-                          color: Color(0xFF2D3748),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF2D3748),
                         ),
                       ),
                       onPressed: () => Navigator.pop(context),
@@ -287,7 +297,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               ),
 
               // Profile Section moderne
-              _buildModernProfile(),
+              _buildModernProfile(isDark),
 
               const SizedBox(height: 24),
 
@@ -297,18 +307,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
                     ...menuSections.map(
-                      (section) => _buildModernMenuSection(section),
+                      (section) => _buildModernMenuSection(section, isDark),
                     ),
 
                     // Theme Switcher à la fin
                     const SizedBox(height: 8),
-                    _buildThemeSwitcher(),
+                    _buildThemeSwitcher(isDark),
                   ],
                 ),
               ),
 
               // Footer avec déconnexion
-              _buildModernFooter(),
+              _buildModernFooter(isDark),
             ],
           ),
         ),
@@ -316,12 +326,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildThemeSwitcher() {
+  void _toggleTheme(bool value) {
+    Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+  }
+
+  Widget _buildThemeSwitcher(bool isDark) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -329,30 +343,30 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF1F2937) : Colors.amber[100],
+              color: isDark ? const Color(0xFF1F2937) : Colors.amber[100],
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
               size: 20,
-              color: isDarkMode ? Colors.white : Colors.amber[700],
+              color: isDark ? Colors.white : Colors.amber[700],
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              isDarkMode ? 'Mode sombre' : 'Mode clair',
-              style: const TextStyle(
+              isDark ? 'Mode sombre' : 'Mode clair',
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF374151),
+                color: isDark ? Colors.white : const Color(0xFF374151),
               ),
             ),
           ),
           Transform.scale(
             scale: 0.9,
             child: Switch(
-              value: isDarkMode,
+              value: isDark,
               onChanged: _toggleTheme,
               activeColor: Theme.of(context).primaryColor,
               activeTrackColor: Theme.of(context).primaryColor.withOpacity(0.5),
@@ -365,14 +379,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildModernProfile() {
+  Widget _buildModernProfile(bool isDark) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
         homeRouterDelegate.beamToNamed('/home/profile');
-        // close drawer
-
-        print("Navigating to profile...");
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -476,11 +487,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildModernMenuSection(MenuSection section) {
+  Widget _buildModernMenuSection(MenuSection section, bool isDark) {
     // Si c'est un lien simple sans sous-items
     if (section.link != null &&
         (section.items == null || section.items!.isEmpty)) {
-      return _buildModernSimpleMenuItem(section);
+      return _buildModernSimpleMenuItem(section, isDark);
     }
 
     // Si c'est une section avec des sous-items
@@ -518,6 +529,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                       decoration: BoxDecoration(
                         color: isActive
                             ? Theme.of(context).primaryColor.withOpacity(0.15)
+                            : isDark
+                            ? Colors.white.withOpacity(0.05)
                             : Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -526,6 +539,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                         size: 20,
                         color: isActive
                             ? Theme.of(context).primaryColor
+                            : isDark
+                            ? Colors.white.withOpacity(0.7)
                             : const Color(0xFF6B7280),
                       ),
                     ),
@@ -540,6 +555,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                               : FontWeight.w500,
                           color: isActive
                               ? Theme.of(context).primaryColor
+                              : isDark
+                              ? Colors.white
                               : const Color(0xFF374151),
                         ),
                       ),
@@ -551,6 +568,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                         Icons.keyboard_arrow_down,
                         color: isActive
                             ? Theme.of(context).primaryColor
+                            : isDark
+                            ? Colors.white.withOpacity(0.5)
                             : const Color(0xFF9CA3AF),
                       ),
                     ),
@@ -565,7 +584,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             child: isExpanded
                 ? Container(
                     margin: const EdgeInsets.only(left: 16, top: 4),
-                    child: _buildModernSubItems(section),
+                    child: _buildModernSubItems(section, isDark),
                   )
                 : const SizedBox.shrink(),
           ),
@@ -574,7 +593,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildModernSimpleMenuItem(MenuSection section) {
+  Widget _buildModernSimpleMenuItem(MenuSection section, bool isDark) {
     final isActive = _isCurrentPath(section.link!);
 
     return Container(
@@ -602,6 +621,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   decoration: BoxDecoration(
                     color: isActive
                         ? Theme.of(context).primaryColor.withOpacity(0.15)
+                        : isDark
+                        ? Colors.white.withOpacity(0.05)
                         : Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -610,6 +631,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     size: 20,
                     color: isActive
                         ? Theme.of(context).primaryColor
+                        : isDark
+                        ? Colors.white.withOpacity(0.7)
                         : const Color(0xFF6B7280),
                   ),
                 ),
@@ -622,6 +645,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                       color: isActive
                           ? Theme.of(context).primaryColor
+                          : isDark
+                          ? Colors.white
                           : const Color(0xFF374151),
                     ),
                   ),
@@ -634,7 +659,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildModernSubItems(MenuSection section) {
+  Widget _buildModernSubItems(MenuSection section, bool isDark) {
     return Column(
       children: section.items!.map((item) {
         final isActive = _isCurrentPath(item.link);
@@ -664,6 +689,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       color: isActive
                           ? Theme.of(context).primaryColor
+                          : isDark
+                          ? Colors.white.withOpacity(0.3)
                           : const Color(0xFFD1D5DB),
                       shape: BoxShape.circle,
                     ),
@@ -679,6 +706,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                             : FontWeight.w500,
                         color: isActive
                             ? Theme.of(context).primaryColor
+                            : isDark
+                            ? Colors.white.withOpacity(0.8)
                             : const Color(0xFF6B7280),
                       ),
                     ),
@@ -711,11 +740,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildModernFooter() {
+  Widget _buildModernFooter(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1f2937) : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),

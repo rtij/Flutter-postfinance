@@ -16,7 +16,8 @@ class ThemeProvider extends ChangeNotifier {
   bool get isDarkMode {
     if (_isDarkMode == null) {
       // Si pas de préférence définie, utiliser le thème du système
-      final brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+      final brightness =
+          SchedulerBinding.instance.platformDispatcher.platformBrightness;
       return brightness == Brightness.dark;
     }
     return _isDarkMode!;
@@ -30,14 +31,14 @@ class ThemeProvider extends ChangeNotifier {
   // Charger la préférence sauvegardée
   Future<void> _loadThemePreference() async {
     _prefs = await SharedPreferences.getInstance();
-    
+
     final followSystem = _prefs?.getBool('followSystem') ?? true;
     if (followSystem) {
       _isDarkMode = null; // Suivre le système
     } else {
       _isDarkMode = _prefs?.getBool('isDarkMode') ?? false;
     }
-    
+
     _isInitialized = true;
     notifyListeners();
   }
@@ -47,7 +48,7 @@ class ThemeProvider extends ChangeNotifier {
     if (_prefs == null) {
       _prefs = await SharedPreferences.getInstance();
     }
-    
+
     if (_isDarkMode == null) {
       await _prefs?.setBool('followSystem', true);
     } else {
@@ -56,28 +57,40 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Basculer entre light/dark
+  // ✅ OPTIMISATION : Vérifier si le changement est nécessaire avant notifyListeners
   Future<void> toggleTheme() async {
+    final oldValue = isDarkMode; // Capturer l'ancienne valeur
+
     if (_isDarkMode == null) {
       // Si on suit le système, basculer vers le mode opposé
-      final brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+      final brightness =
+          SchedulerBinding.instance.platformDispatcher.platformBrightness;
       _isDarkMode = brightness == Brightness.light; // Inverse du système
     } else {
       _isDarkMode = !_isDarkMode!;
     }
-    await _saveThemePreference();
-    notifyListeners();
+
+    // ✅ Ne notifier QUE si la valeur a vraiment changé
+    if (oldValue != isDarkMode) {
+      await _saveThemePreference();
+      notifyListeners();
+    }
   }
 
-  // Définir manuellement le mode sombre
+  // ✅ OPTIMISATION : Vérifier avant de notifier
   Future<void> setDarkMode(bool value) async {
+    if (_isDarkMode == value)
+      return; // ✅ Pas de changement, pas de notification
+
     _isDarkMode = value;
     await _saveThemePreference();
     notifyListeners();
   }
 
-  // Réinitialiser pour suivre le thème système
+  // ✅ OPTIMISATION : Vérifier avant de notifier
   Future<void> followSystemTheme() async {
+    if (_isDarkMode == null) return; // ✅ Déjà en mode système
+
     _isDarkMode = null;
     await _saveThemePreference();
     notifyListeners();
@@ -113,9 +126,7 @@ final ThemeData _lightTheme = ThemeData(
       backgroundColor: const Color(0xFF6366f1),
       foregroundColor: Colors.white,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
   ),
   inputDecorationTheme: InputDecorationTheme(
@@ -123,22 +134,15 @@ final ThemeData _lightTheme = ThemeData(
     fillColor: Colors.white.withOpacity(0.5),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: Colors.white.withOpacity(0.3),
-      ),
+      borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: Colors.white.withOpacity(0.3),
-      ),
+      borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
-      borderSide: const BorderSide(
-        color: Color(0xFF6366f1),
-        width: 2,
-      ),
+      borderSide: const BorderSide(color: Color(0xFF6366f1), width: 2),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
@@ -180,9 +184,7 @@ final ThemeData _darkTheme = ThemeData(
       backgroundColor: const Color(0xFF6366f1),
       foregroundColor: Colors.white,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
   ),
   inputDecorationTheme: InputDecorationTheme(
@@ -190,22 +192,15 @@ final ThemeData _darkTheme = ThemeData(
     fillColor: Colors.white.withOpacity(0.05),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: Colors.white.withOpacity(0.1),
-      ),
+      borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: Colors.white.withOpacity(0.1),
-      ),
+      borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
-      borderSide: const BorderSide(
-        color: Color(0xFF818cf8),
-        width: 2,
-      ),
+      borderSide: const BorderSide(color: Color(0xFF818cf8), width: 2),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
@@ -218,5 +213,7 @@ final ThemeData _darkTheme = ThemeData(
     checkColor: MaterialStateProperty.all(Colors.white),
   ),
 );
+
+// Getters publics pour accéder aux thèmes
 ThemeData get darkTheme => _darkTheme;
 ThemeData get lightTheme => _lightTheme;
