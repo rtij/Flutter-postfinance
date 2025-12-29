@@ -8,12 +8,15 @@ class AnimatedBackground extends StatefulWidget {
   final bool showThemeSwitcher;
   final bool showPageIndicators;
   final EdgeInsets contentPadding;
+  final bool? isDarkMode; // ✅ AJOUT : Paramètre pour le thème
+
   const AnimatedBackground({
     super.key,
     required this.content,
     this.showThemeSwitcher = true,
     this.showPageIndicators = true,
     this.contentPadding = const EdgeInsets.all(32),
+    this.isDarkMode, // ✅ Optionnel
   });
 
   @override
@@ -53,7 +56,9 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // ✅ CORRECTION : Utiliser le paramètre si fourni, sinon fallback sur Theme.of(context)
+    final isDark =
+        widget.isDarkMode ?? Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Stack(

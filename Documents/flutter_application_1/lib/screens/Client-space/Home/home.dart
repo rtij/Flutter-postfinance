@@ -102,7 +102,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         collapsed: true,
         items: [
           MenuItem(
-            link: '/home/gestion-compte/mes-comptes',
+            link: '/home/dashboard',
             label: 'Mes comptes',
             icon: Icons.chevron_right,
           ),
@@ -604,6 +604,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           borderRadius: BorderRadius.circular(16),
           onTap: () {
             Navigator.pop(context);
+            // show message snackbar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Navigating to ${section.title}')),
+            );
+            print("Navigating to ${section.link}");
             homeRouterDelegate.beamToNamed(section.link!);
           },
           child: Container(
@@ -669,8 +674,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () {
-              Navigator.pop(context);
-              context.beamToNamed(item.link);
+              Navigator.pop(context);ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Navigating to ${section.title}')),
+            );
+            print("Navigating to ${section.link}");
+              homeRouterDelegate.beamToNamed(item.link);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

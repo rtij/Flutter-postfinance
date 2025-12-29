@@ -7,6 +7,8 @@ import '../screens/Login/login.dart';
 import '../screens/forgot-password/forgot-password.dart';
 import '../screens/Client-space/profile/profile.dart';
 import '../screens/notFound.dart';
+import '../screens/Client-space/Beneficiaire/nouveau_beneficiaire.dart';
+import '../screens/Client-space/Beneficiaire/list_beneficiaire.dart';
 
 bool isLoggedIn() {
   final token = localStorage.getItem('token');
@@ -53,6 +55,8 @@ final homeRouterDelegate = BeamerDelegate(
     routes: {
       '/home/dashboard': (context,data, state) => const Dashboard(),
       '/home/profile': (context,data, state) => const ProfileScreen(),
+      '/home/nouveau-beneficiaire': (context,data, state) => const NouveauBeneficiaireScreen(),
+      '/home/mes-beneficiaires': (context,data, state) => const BeneficiairesListScreen(),
     },
   ).call,
 );
